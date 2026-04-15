@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>School AI Chat</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+  display: flex;
+  justify-content: center;
+}
+
+#container {
+  width: 600px;
+  margin-top: 40px;
+}
+
+#chat {
+  height: 500px;
+  overflow-y: auto;
+  background: #111827;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.msg {
+  padding: 10px;
+  margin: 8px;
+  border-radius: 10px;
+  max-width: 80%;
+}
+
+.user {
+  background: #2563eb;
+  margin-left: auto;
+}
+
+.bot {
+  background: #374151;
+}
+
+#inputArea {
+  display: flex;
+  margin-top: 10px;
+}
+
+input {
+  flex: 1;
+  padding: 10px;
+}
+
+button {
+  padding: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="container">
+  <h2>AI Assistant</h2>
+
+  <div id="chat"></div>
+
+  <div id="inputArea">
+    <input id="input" placeholder="Ask something...">
+    <button onclick="send()">Send</button>
+  </div>
+</div>
+
+<script>
+async function send() {
+  const input = document.getElementById("input");
+  const text = input.value;
+  input.value = "";
+
+  addMsg(text, "user");
+
+  const res = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer YOUR_API_KEY_HERE"
+    },
+    body: JSON.stringify({
+      model: "gpt-4.1-mini",
+      input: text
+    })
+  });
+
+  const data = await res.json();
+  const reply = data.output?.[0]?.content?.[0]?.text || "Error";
+
+  addMsg(reply, "bot");
+}
+
+function addMsg(text, type) {
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text;
+  document.getElementById("chat").appendChild(div);
+}
+</script>
+
+</body>
+</html>
