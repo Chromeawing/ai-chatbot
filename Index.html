@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>School AI Chat</title>
+<title>AI Chatbot</title>
 
 <style>
 body {
@@ -31,6 +31,7 @@ body {
   margin: 8px;
   border-radius: 10px;
   max-width: 80%;
+  white-space: pre-wrap;
 }
 
 .user {
@@ -72,29 +73,35 @@ button {
 </div>
 
 <script>
+
+const BACKEND_URL = "https://ai-chatbot-hrit.onrender.com";
+
 async function send() {
   const input = document.getElementById("input");
   const text = input.value;
   input.value = "";
 
+  if (!text) return;
+
   addMsg(text, "user");
 
-  const res = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer YOUR_API_KEY_HERE"
-    },
-    body: JSON.stringify({
-      model: "gpt-4.1-mini",
-      input: text
-    })
-  });
+  try {
+    const res = await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: text
+      })
+    });
 
-  const data = await res.json();
-  const reply = data.output?.[0]?.content?.[0]?.text || "Error";
+    const data = await res.json();
+    addMsg(data.reply || "No response", "bot");
 
-  addMsg(reply, "bot");
+  } catch (err) {
+    addMsg("Error connecting to server", "bot");
+  }
 }
 
 function addMsg(text, type) {
@@ -102,7 +109,9 @@ function addMsg(text, type) {
   div.className = "msg " + type;
   div.innerText = text;
   document.getElementById("chat").appendChild(div);
+  document.getElementById("chat").scrollTop = 999999;
 }
+
 </script>
 
 </body>
